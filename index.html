@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CRM Pipeline Dashboard</title>
+    <link rel="stylesheet" href="src/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Pipeline Pulse CRM</p>
+        <h1>CRM Pipeline Dashboard</h1>
+      </div>
+      <div class="header-actions">
+        <label for="owner-filter">Owner</label>
+        <select id="owner-filter">
+          <option value="all">All owners</option>
+        </select>
+      </div>
+    </header>
+
+    <main>
+      <section class="metrics" aria-label="Pipeline metrics">
+        <article>
+          <span id="metric-open">$0</span>
+          <p>Open pipeline</p>
+        </article>
+        <article>
+          <span id="metric-weighted">$0</span>
+          <p>Weighted pipeline</p>
+        </article>
+        <article>
+          <span id="metric-critical">0</span>
+          <p>Critical deals</p>
+        </article>
+        <article>
+          <span id="metric-overdue">0</span>
+          <p>Overdue tasks</p>
+        </article>
+      </section>
+
+      <section class="layout">
+        <aside class="account-panel">
+          <h2>Account Health</h2>
+          <div id="account-list" class="account-list"></div>
+        </aside>
+
+        <section class="pipeline-panel">
+          <div class="panel-heading">
+            <h2>Open Opportunities</h2>
+            <p id="result-count">0 deals</p>
+          </div>
+          <div id="opportunity-list" class="opportunity-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
