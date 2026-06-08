@@ -16,6 +16,7 @@ Pipeline Pulse CRM is a static client-side dashboard for reviewing open pipeline
 - Put reusable sales-operations logic in `src/crm.js`; keep `src/main.js` focused on rendering and browser events.
 - Add or update tests for changes to risk scoring, forecast categories, owner filters, account snapshots, or pipeline summaries.
 - Prefer data-shape changes in `data/crm.json` over hardcoded special cases in UI code.
+- When starting a new feature on the codebase, start with the `features/template` folder, create a new subfolder under `features/` named for the feature, copy the template files into it, and iterate with the user on the details.
 - Do not introduce external services, API keys, or network-dependent runtime behavior.
 - Preserve the no-build setup unless a feature clearly requires a build step.
 
@@ -40,4 +41,3 @@ For UI changes, run the app locally and verify the dashboard still loads:
 ```bash
 npm run dev
 ```
-
