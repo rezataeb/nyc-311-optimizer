@@ -1,61 +1,881 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CRM Pipeline Dashboard</title>
-    <link rel="stylesheet" href="src/styles.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>311 Complaint Optimizer</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #102033;
+        --muted: #5d6978;
+        --faint: #eef2f5;
+        --line: #d8e0e8;
+        --paper: #ffffff;
+        --city-blue: #154f86;
+        --blue-deep: #0d3a63;
+        --blue-soft: #eaf3fb;
+        --green: #237a4b;
+        --green-bg: #e8f6ed;
+        --yellow: #9a6a00;
+        --yellow-bg: #fff3cf;
+        --red: #b1322c;
+        --red-bg: #fde8e6;
+        --shadow: 0 18px 60px rgba(16, 32, 51, 0.13);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(234, 243, 251, 0.95), rgba(255, 255, 255, 0.78) 34%),
+          #f8fafc;
+      }
+
+      button,
+      textarea {
+        font: inherit;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .app {
+        width: min(1160px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 18px 0 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .seal {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border: 2px solid var(--city-blue);
+        border-radius: 50%;
+        background: var(--paper);
+        color: var(--city-blue);
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4.2vw, 4rem);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .tagline {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 1.05rem;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 36px;
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--muted);
+        font-size: 0.88rem;
+        white-space: nowrap;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(320px, 430px) 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .panel,
+      .result-card,
+      .skeleton-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: var(--shadow);
+      }
+
+      .panel {
+        position: sticky;
+        top: 18px;
+        padding: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 760;
+      }
+
+      textarea {
+        display: block;
+        width: 100%;
+        min-height: 212px;
+        resize: vertical;
+        border: 1px solid #c7d3df;
+        border-radius: 8px;
+        padding: 15px;
+        color: var(--ink);
+        background: #fbfdff;
+        line-height: 1.45;
+        outline: none;
+      }
+
+      textarea:focus {
+        border-color: var(--city-blue);
+        box-shadow: 0 0 0 4px rgba(21, 79, 134, 0.13);
+      }
+
+      .tone-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin: 18px 0;
+      }
+
+      .tone-button,
+      .primary,
+      .secondary,
+      .copy {
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        cursor: pointer;
+        transition:
+          transform 140ms ease,
+          border-color 140ms ease,
+          background 140ms ease,
+          color 140ms ease;
+      }
+
+      .tone-button {
+        background: #f7f9fb;
+        color: var(--muted);
+        font-weight: 720;
+      }
+
+      .tone-button[aria-pressed="true"] {
+        border-color: var(--city-blue);
+        background: var(--blue-soft);
+        color: var(--city-blue);
+      }
+
+      .primary {
+        display: inline-flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border-color: var(--city-blue);
+        background: var(--city-blue);
+        color: white;
+        font-weight: 780;
+      }
+
+      .primary:hover,
+      .secondary:hover,
+      .copy:hover,
+      .tone-button:hover {
+        transform: translateY(-1px);
+      }
+
+      .primary:disabled {
+        cursor: wait;
+        opacity: 0.72;
+        transform: none;
+      }
+
+      .hint {
+        margin: 13px 0 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.45;
+      }
+
+      .error {
+        display: none;
+        margin-top: 14px;
+        border: 1px solid #f1b6b2;
+        border-radius: 8px;
+        padding: 12px;
+        background: var(--red-bg);
+        color: var(--red);
+        font-weight: 680;
+      }
+
+      .error.is-visible {
+        display: block;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .results {
+        display: grid;
+        gap: 16px;
+      }
+
+      .examples-title {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 0 0 12px;
+      }
+
+      .examples-title h2 {
+        margin: 0;
+        font-size: 1.15rem;
+      }
+
+      .examples-title span {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .result-card {
+        overflow: hidden;
+      }
+
+      .card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 18px 14px;
+        border-bottom: 1px solid var(--line);
+        background: #fbfdff;
+      }
+
+      .category {
+        margin: 0;
+        color: var(--city-blue);
+        font-size: 0.85rem;
+        font-weight: 820;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .agency {
+        margin: 5px 0 0;
+        font-size: 1.06rem;
+        font-weight: 760;
+      }
+
+      .likelihood {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .likelihood.high {
+        background: var(--green-bg);
+        color: var(--green);
+      }
+
+      .likelihood.medium {
+        background: var(--yellow-bg);
+        color: var(--yellow);
+      }
+
+      .likelihood.low {
+        background: var(--red-bg);
+        color: var(--red);
+      }
+
+      .card-body {
+        padding: 18px;
+      }
+
+      .section {
+        margin: 0 0 16px;
+      }
+
+      .section:last-child {
+        margin-bottom: 0;
+      }
+
+      .section-label {
+        display: block;
+        margin: 0 0 7px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 840;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .complaint-box {
+        border-left: 4px solid var(--city-blue);
+        padding: 12px 13px;
+        background: var(--blue-soft);
+        line-height: 1.5;
+      }
+
+      .legal {
+        line-height: 1.45;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .secondary,
+      .copy {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 9px 13px;
+        text-decoration: none;
+        font-weight: 760;
+      }
+
+      .secondary {
+        border-color: var(--blue-deep);
+        background: var(--blue-deep);
+        color: white;
+      }
+
+      .copy {
+        background: #ffffff;
+        color: var(--city-blue);
+      }
+
+      .skeleton-card {
+        padding: 18px;
+      }
+
+      .skeleton-line {
+        height: 14px;
+        margin: 10px 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #e6edf3, #f7f9fb, #e6edf3);
+        background-size: 220% 100%;
+        animation: pulse 1.25s ease-in-out infinite;
+      }
+
+      .skeleton-line.short {
+        width: 44%;
+      }
+
+      .skeleton-line.mid {
+        width: 68%;
+      }
+
+      .skeleton-line.tall {
+        height: 54px;
+        border-radius: 8px;
+      }
+
+      @keyframes pulse {
+        0% {
+          background-position: 100% 0;
+        }
+        100% {
+          background-position: -100% 0;
+        }
+      }
+
+      @media (max-width: 860px) {
+        .app {
+          width: min(100% - 22px, 720px);
+          padding-top: 18px;
+        }
+
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        main {
+          grid-template-columns: 1fr;
+        }
+
+        .panel {
+          position: static;
+        }
+      }
+
+      @media (max-width: 520px) {
+        h1 {
+          font-size: 2.25rem;
+        }
+
+        .tone-row {
+          grid-template-columns: 1fr;
+        }
+
+        .card-top {
+          flex-direction: column;
+        }
+
+        .actions a,
+        .actions button {
+          width: 100%;
+        }
+      }
+    </style>
   </head>
   <body>
-    <header class="app-header">
-      <div>
-        <p class="eyebrow">Pipeline Pulse CRM</p>
-        <h1>CRM Pipeline Dashboard</h1>
-      </div>
-      <div class="header-actions">
-        <label for="owner-filter">Owner</label>
-        <select id="owner-filter">
-          <option value="all">All owners</option>
-        </select>
-      </div>
-    </header>
-
-    <main>
-      <section class="metrics" aria-label="Pipeline metrics">
-        <article>
-          <span id="metric-open">$0</span>
-          <p>Open pipeline</p>
-        </article>
-        <article>
-          <span id="metric-weighted">$0</span>
-          <p>Weighted pipeline</p>
-        </article>
-        <article>
-          <span id="metric-critical">0</span>
-          <p>Critical deals</p>
-        </article>
-        <article>
-          <span id="metric-overdue">0</span>
-          <p>Overdue tasks</p>
-        </article>
-      </section>
-
-      <section class="layout">
-        <aside class="account-panel">
-          <h2>Account Health</h2>
-          <div id="account-list" class="account-list"></div>
-        </aside>
-
-        <section class="pipeline-panel">
-          <div class="panel-heading">
-            <h2>Open Opportunities</h2>
-            <p id="result-count">0 deals</p>
+    <div class="app">
+      <header>
+        <div class="brand">
+          <div class="seal" aria-hidden="true">311</div>
+          <div>
+            <h1>311 Complaint Optimizer</h1>
+            <p class="tagline">Turn your frustration into action.</p>
           </div>
-          <div id="opportunity-list" class="opportunity-list"></div>
-        </section>
-      </section>
-    </main>
+        </div>
+        <div class="status-pill" title="Runs in your browser with OpenAI when an API key is available">
+          <span class="dot" aria-hidden="true"></span>
+          AI-assisted civic filing
+        </div>
+      </header>
 
-    <script type="module" src="src/main.js"></script>
+      <main>
+        <section class="panel" aria-labelledby="optimizer-title">
+          <h2 class="sr-only" id="optimizer-title">Complaint optimizer form</h2>
+          <form id="complaint-form">
+            <label for="complaint-input">Describe your problem in plain English</label>
+            <textarea
+              id="complaint-input"
+              placeholder="Example: The apartment has had no hot water for three days and the landlord has not responded."
+              required
+            ></textarea>
+
+            <div class="tone-row" role="group" aria-label="Tone selector">
+              <button class="tone-button" type="button" data-tone="polite" aria-pressed="false">Polite</button>
+              <button class="tone-button" type="button" data-tone="firm" aria-pressed="true">Firm</button>
+              <button class="tone-button" type="button" data-tone="urgent" aria-pressed="false">Urgent</button>
+            </div>
+
+            <button class="primary" id="submit-button" type="submit">Optimize My Complaint</button>
+            <p class="hint">
+              The app returns a stronger complaint, the likely 311 category, responsible agency, legal note, and a direct filing link.
+            </p>
+            <div class="error" id="error" role="alert"></div>
+          </form>
+        </section>
+
+        <section aria-labelledby="results-title">
+          <div class="examples-title">
+            <h2 id="results-title">Ready-to-file examples</h2>
+            <span id="result-count">Loading examples...</span>
+          </div>
+          <div class="results" id="results"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      const SUBMIT_URLS = {
+        "HEAT/HOT WATER": "https://portal.311.nyc.gov/article/?kanumber=KA-01036",
+        NOISE: "https://portal.311.nyc.gov/article/?kanumber=KA-01198",
+        SANITATION: "https://portal.311.nyc.gov/article/?kanumber=KA-01788",
+        "STREET/SIDEWALK": "https://portal.311.nyc.gov/article/?kanumber=KA-01297",
+        CONSTRUCTION: "https://portal.311.nyc.gov/article/?kanumber=KA-01032",
+        DEFAULT: "https://portal.311.nyc.gov/"
+      };
+
+      const examples = [
+        {
+          input: "My landlord hasn't fixed the heat in 2 weeks, it's freezing",
+          tone: "firm"
+        },
+        {
+          input: "My neighbor plays loud music every night after midnight",
+          tone: "urgent"
+        },
+        {
+          input: "There's a giant pothole on my street that damaged my car",
+          tone: "polite"
+        }
+      ];
+
+      const demoResults = [
+        {
+          rewritten:
+            "My apartment has been without adequate heat for approximately two weeks, despite the landlord having notice of the condition. The indoor temperature is unreasonably cold and may fall below the minimum heat requirements during heat season. I am requesting an HPD inspection and prompt enforcement so the owner restores lawful heat service immediately. Please document this as an ongoing habitability issue affecting tenant health and safety.",
+          category: "HEAT/HOT WATER",
+          agency: "HPD",
+          agency_full: "NYC Housing Preservation & Development",
+          legal_note:
+            "During heat season, landlords must maintain required indoor temperatures and HPD may inspect and issue violations requiring correction, often within 24 hours for immediately hazardous heat conditions.",
+          likelihood: "High"
+        },
+        {
+          rewritten:
+            "There is recurring loud music from a neighboring apartment every night after midnight, disrupting sleep and creating an unreasonable nighttime noise condition. The noise is persistent, occurs during overnight quiet hours, and can be heard clearly inside my residence. I am requesting a noise complaint response and documentation of the repeated after-hours disturbance. Please treat this as an urgent recurring quality-of-life issue.",
+          category: "NOISE",
+          agency: "NYPD",
+          agency_full: "New York City Police Department",
+          legal_note:
+            "NYC noise rules restrict unreasonable residential noise during nighttime hours, and enforcement typically depends on officers witnessing the condition when they respond.",
+          likelihood: "Medium"
+        },
+        {
+          rewritten:
+            "There is a large pothole on my street that appears deep enough to create a hazard for vehicles and cyclists. My vehicle was damaged after striking it, and I am concerned that additional drivers may be affected if it is not repaired. Please inspect the roadway condition and schedule repair or make-safe work as appropriate. I would appreciate documentation of the defect and any repair timeline.",
+          category: "STREET/SIDEWALK",
+          agency: "DOT",
+          agency_full: "NYC Department of Transportation",
+          legal_note:
+            "DOT is responsible for inspecting reported street defects and prioritizing roadway repairs based on location, severity, and safety risk.",
+          likelihood: "High"
+        }
+      ];
+
+      const state = {
+        input: "",
+        tone: "firm",
+        loading: false,
+        result: null,
+        error: null
+      };
+
+      const systemPrompt =
+        "You are an expert NYC 311 advocate. You know every complaint category, every responsible city agency, and the exact language that gets complaints acted on fastest. You always respond in valid JSON only — no preamble, no markdown, no explanation.";
+
+      const inputEl = document.querySelector("#complaint-input");
+      const formEl = document.querySelector("#complaint-form");
+      const resultsEl = document.querySelector("#results");
+      const submitButton = document.querySelector("#submit-button");
+      const errorEl = document.querySelector("#error");
+      const countEl = document.querySelector("#result-count");
+      const toneButtons = Array.from(document.querySelectorAll(".tone-button"));
+
+      const getOpenAIKey = () =>
+        window.OPENAI_API_KEY ||
+        localStorage.getItem("OPENAI_API_KEY") ||
+        new URLSearchParams(window.location.search).get("key") ||
+        "";
+
+      function setTone(tone) {
+        state.tone = tone;
+        toneButtons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.tone === tone));
+        });
+      }
+
+      function userPrompt(input, tone) {
+        return `Here is a complaint from an NYC resident: ${input}
+Tone requested: ${tone}
+
+Return this exact JSON and nothing else:
+{
+  'rewritten': 'the optimized complaint in ${tone} tone, specific and legally grounded, 3-5 sentences',
+  'category': 'exact 311 category name in ALL CAPS',
+  'agency': 'agency acronym e.g. HPD, DOT, DSNY, DEP, FDNY',
+  'agency_full': 'full agency name',
+  'legal_note': 'one sentence: what the agency or landlord is legally required to do and within what timeframe',
+  'likelihood': 'High or Medium or Low — based on how actionable this complaint type typically is'
+}`;
+      }
+
+      function stripJsonFences(text) {
+        return text
+          .trim()
+          .replace(/^```(?:json)?/i, "")
+          .replace(/```$/i, "")
+          .trim();
+      }
+
+      function submitUrlFor(category = "") {
+        const normalized = category.toUpperCase();
+        if (SUBMIT_URLS[normalized]) return SUBMIT_URLS[normalized];
+        if (normalized.includes("HEAT") || normalized.includes("HOT WATER")) return SUBMIT_URLS["HEAT/HOT WATER"];
+        if (normalized.includes("NOISE")) return SUBMIT_URLS.NOISE;
+        if (normalized.includes("SANITATION") || normalized.includes("TRASH")) return SUBMIT_URLS.SANITATION;
+        if (normalized.includes("STREET") || normalized.includes("SIDEWALK") || normalized.includes("POTHOLE")) {
+          return SUBMIT_URLS["STREET/SIDEWALK"];
+        }
+        if (normalized.includes("CONSTRUCTION")) return SUBMIT_URLS.CONSTRUCTION;
+        return SUBMIT_URLS.DEFAULT;
+      }
+
+      function withSubmitUrl(result) {
+        return {
+          ...result,
+          category: result.category || "GENERAL 311 SERVICE REQUEST",
+          agency: result.agency || "311",
+          agency_full: result.agency_full || "NYC 311",
+          likelihood: result.likelihood || "Medium",
+          submit_url: submitUrlFor(result.category)
+        };
+      }
+
+      function timeoutAfter(ms) {
+        return new Promise((_, reject) => {
+          window.setTimeout(() => reject(new Error("timeout")), ms);
+        });
+      }
+
+      function fallbackFor(input, tone) {
+        const lower = input.toLowerCase();
+        if (lower.includes("heat") || lower.includes("hot water") || lower.includes("landlord")) {
+          return withSubmitUrl({
+            ...demoResults[0],
+            rewritten:
+              tone === "polite"
+                ? "My apartment has been without reliable heat or hot water, and I would appreciate an HPD inspection to help resolve the condition. The landlord has been made aware, but the service has not been restored. This is affecting basic habitability and tenant safety. Please document the condition and require the owner to make the necessary repairs."
+                : demoResults[0].rewritten
+          });
+        }
+        if (lower.includes("noise") || lower.includes("music") || lower.includes("neighbor")) {
+          return withSubmitUrl(demoResults[1]);
+        }
+        if (lower.includes("pothole") || lower.includes("street") || lower.includes("sidewalk")) {
+          return withSubmitUrl(demoResults[2]);
+        }
+        if (lower.includes("trash") || lower.includes("garbage") || lower.includes("rats")) {
+          return withSubmitUrl({
+            rewritten:
+              "There is an ongoing sanitation condition at this location involving accumulated trash or refuse that may attract pests and create a public health concern. The condition has not been corrected and needs inspection or enforcement by the responsible agency. Please document the location, require cleanup, and take any appropriate enforcement action. This complaint is specific, observable, and time-sensitive.",
+            category: "SANITATION",
+            agency: "DSNY",
+            agency_full: "NYC Department of Sanitation",
+            legal_note:
+              "Property owners and businesses must keep sidewalks and refuse areas clean, and DSNY can issue summonses or require cleanup for verified sanitation violations.",
+            likelihood: "High"
+          });
+        }
+        return withSubmitUrl({
+          rewritten:
+            "I am reporting an ongoing condition at this location that is affecting safety, access, or quality of life and requires city review. The issue is specific, observable, and has not been resolved through ordinary follow-up. Please route this complaint to the responsible agency for inspection, documentation, and appropriate corrective action. I am requesting a service request number and any available timeline for response.",
+          category: "GENERAL 311 SERVICE REQUEST",
+          agency: "311",
+          agency_full: "NYC 311",
+          legal_note:
+            "311 routes complaints to the responsible agency, and response timelines vary by category, location, and whether an inspector can verify the condition.",
+          likelihood: "Medium"
+        });
+      }
+
+      async function optimizeComplaint(input, tone, fallbackIndex = null) {
+        const apiKey = getOpenAIKey();
+        if (!apiKey) {
+          await new Promise((resolve) => window.setTimeout(resolve, 420));
+          return withSubmitUrl(fallbackIndex === null ? fallbackFor(input, tone) : demoResults[fallbackIndex]);
+        }
+
+        try {
+          const { default: OpenAI } = await import("https://esm.sh/openai@4.104.0");
+          const client = new OpenAI({
+            apiKey,
+            dangerouslyAllowBrowser: true
+          });
+
+          const request = client.chat.completions.create({
+            model: "gpt-4o",
+            max_tokens: 1000,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt(input, tone) }
+            ]
+          });
+
+          const response = await Promise.race([request, timeoutAfter(8000)]);
+          const content = response.choices?.[0]?.message?.content || "";
+          return withSubmitUrl(JSON.parse(stripJsonFences(content)));
+        } catch (error) {
+          if (error.message === "timeout") {
+            throw new Error("The request took more than 8 seconds — try again in a moment.");
+          }
+          throw new Error("Something went wrong — try rephrasing your complaint");
+        }
+      }
+
+      function renderSkeletons(count = 3) {
+        resultsEl.innerHTML = Array.from({ length: count }, () => {
+          return skeletonMarkup();
+        }).join("");
+      }
+
+      function skeletonMarkup() {
+        return `<article class="skeleton-card" aria-label="Loading result">
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line mid"></div>
+            <div class="skeleton-line tall"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line mid"></div>
+          </article>`;
+      }
+
+      function createSkeletonCard() {
+        const template = document.createElement("template");
+        template.innerHTML = skeletonMarkup().trim();
+        return template.content.firstElementChild;
+      }
+
+      function likelihoodClass(likelihood) {
+        return String(likelihood || "Medium").toLowerCase();
+      }
+
+      function renderCard(result, sourceInput = "") {
+        const article = document.createElement("article");
+        article.className = "result-card";
+        article.innerHTML = `
+          <div class="card-top">
+            <div>
+              <p class="category">${escapeHtml(result.category)}</p>
+              <p class="agency">${escapeHtml(result.agency)} · ${escapeHtml(result.agency_full)}</p>
+            </div>
+            <span class="likelihood ${likelihoodClass(result.likelihood)}">${escapeHtml(result.likelihood)} likelihood</span>
+          </div>
+          <div class="card-body">
+            ${sourceInput ? `<div class="section"><span class="section-label">Original Complaint</span><div>${escapeHtml(sourceInput)}</div></div>` : ""}
+            <div class="section">
+              <span class="section-label">Optimized Complaint</span>
+              <div class="complaint-box">${escapeHtml(result.rewritten)}</div>
+            </div>
+            <div class="section">
+              <span class="section-label">Legal Note</span>
+              <div class="legal">${escapeHtml(result.legal_note)}</div>
+            </div>
+            <div class="actions">
+              <a class="secondary" href="${result.submit_url}" target="_blank" rel="noreferrer">Submit to 311</a>
+              <button class="copy" type="button">Copy Complaint</button>
+            </div>
+          </div>
+        `;
+
+        article.querySelector(".copy").addEventListener("click", async (event) => {
+          const button = event.currentTarget;
+          await navigator.clipboard.writeText(result.rewritten);
+          button.textContent = "Copied";
+          window.setTimeout(() => {
+            button.textContent = "Copy Complaint";
+          }, 1300);
+        });
+
+        return article;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function setError(message) {
+        state.error = message;
+        errorEl.textContent = message || "";
+        errorEl.classList.toggle("is-visible", Boolean(message));
+      }
+
+      async function loadExamples() {
+        renderSkeletons(3);
+        countEl.textContent = "Optimizing examples...";
+        try {
+          const results = await Promise.all(
+            examples.map((example, index) => optimizeComplaint(example.input, example.tone, index))
+          );
+          resultsEl.innerHTML = "";
+          results.forEach((result, index) => {
+            resultsEl.appendChild(renderCard(result, examples[index].input));
+          });
+          countEl.textContent = "3 examples loaded";
+        } catch (error) {
+          resultsEl.innerHTML = "";
+          demoResults.map(withSubmitUrl).forEach((result, index) => {
+            resultsEl.appendChild(renderCard(result, examples[index].input));
+          });
+          countEl.textContent = "Demo examples loaded";
+        }
+      }
+
+      toneButtons.forEach((button) => {
+        button.addEventListener("click", () => setTone(button.dataset.tone));
+      });
+
+      formEl.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setError(null);
+        const input = inputEl.value.trim();
+        if (!input) return;
+
+        state.loading = true;
+        submitButton.disabled = true;
+        submitButton.textContent = "Optimizing...";
+        resultsEl.prepend(createSkeletonCard());
+
+        try {
+          const result = await optimizeComplaint(input, state.tone);
+          const firstSkeleton = resultsEl.querySelector(".skeleton-card");
+          if (firstSkeleton) firstSkeleton.remove();
+          resultsEl.prepend(renderCard(result, input));
+          countEl.textContent = `${resultsEl.querySelectorAll(".result-card").length} results shown`;
+          inputEl.value = "";
+        } catch (error) {
+          const firstSkeleton = resultsEl.querySelector(".skeleton-card");
+          if (firstSkeleton) firstSkeleton.remove();
+          setError(error.message || "Something went wrong — try rephrasing your complaint");
+        } finally {
+          state.loading = false;
+          submitButton.disabled = false;
+          submitButton.textContent = "Optimize My Complaint";
+        }
+      });
+
+      loadExamples();
+    </script>
   </body>
 </html>
