@@ -2,42 +2,42 @@
 
 ## Architecture
 
-Pipeline Pulse CRM is a static client-side dashboard for reviewing open pipeline, account health, and deal risk.
+NYC 311 Complaint Optimizer is a single-page civic tool that rewrites plain English complaints into legally grounded 311 filings using the Anthropic Claude API.
 
-- `data/crm.json` contains the local CRM fixture data used by the dashboard.
-- `src/crm.js` contains business logic for scoring risk, assigning forecast categories, filtering owner books, and building account snapshots.
-- `src/main.js` loads CRM data and renders the browser UI.
-- `src/styles.css` contains application styling.
-- `test/crm.test.js` covers CRM business logic with Node's built-in test runner.
+- `index.html` — the entire frontend: HTML, CSS, and vanilla JS in one file. Handles the complaint form, tone picker, skeleton loading, result cards, copy-to-clipboard, and 311 submit links.
+- `api/optimize.js` — Vercel serverless function. Receives `{ input, tone }` from the browser, calls the Anthropic API server-side, parses the JSON response, and returns the result. The API key never reaches the browser.
 
 ## Engineering Rules
 
-- Keep pipeline calculations deterministic and explainable.
-- Put reusable sales-operations logic in `src/crm.js`; keep `src/main.js` focused on rendering and browser events.
-- Add or update tests for changes to risk scoring, forecast categories, owner filters, account snapshots, or pipeline summaries.
-- Prefer data-shape changes in `data/crm.json` over hardcoded special cases in UI code.
-- When starting a new feature on the codebase, start with the `features/template` folder, create a new subfolder under `features/` named for the feature, copy the template files into it, and iterate with the user on the details.
-- Do not introduce external services, API keys, or network-dependent runtime behavior.
-- Preserve the no-build setup unless a feature clearly requires a build step.
+- Keep all business logic (URL lookup, likelihood display, card rendering) in `index.html` — there is no separate JS module layer.
+- The Anthropic API key must only live in `api/optimize.js` via `process.env.ANTHROPIC_API_KEY`. Never reference it in frontend code or use the `VITE_` prefix.
+- Strip any markdown code fences from model output before parsing JSON — do this in `api/optimize.js`, not the frontend.
+- All API calls go through `/api/optimize`. Do not call `api.anthropic.com` directly from the browser.
+- Keep the frontend dependency-free. Do not add npm packages to the client bundle.
+- The `SUBMIT_URLS` lookup table in `index.html` is the authoritative map of 311 categories to portal links. Update it there when adding new categories.
 
 ## Product Rules
 
-- Risk labels should help sales managers find deals that need attention, not punish every imperfect deal.
-- Forecast categories should remain easy to explain: `Commit`, `Best Case`, `Pipeline`, and `At Risk`.
-- Account health and opportunity risk are related but separate concepts.
-- Owner filters should affect pipeline metrics, opportunities, accounts, and tasks consistently.
-- Any recommendation feature should expose why the recommendation was made.
+- The three pre-loaded examples (heat, noise, pothole) must always work on page load — they exercise the full API path.
+- Tone options are exactly: `polite`, `firm`, `urgent`. Do not add or rename tones without updating the model prompt.
+- Result cards must always show: category, agency acronym, full agency name, likelihood badge, optimized complaint, legal note, Submit to 311 link, and Copy Complaint button.
+- Never show a blank screen. Show skeleton cards while loading and a clear error message on failure.
+- Likelihood values from the model are `High`, `Medium`, or `Low` — map them to green, yellow, and red badge styles respectively.
 
 ## Verification
 
-Run the relevant checks before handing off changes:
-
-```bash
-npm test
-```
-
-For UI changes, run the app locally and verify the dashboard still loads:
+Run locally before handing off changes:
 
 ```bash
 npm run dev
 ```
+
+This starts `vercel dev`, which serves both the Vite frontend and the `api/optimize.js` serverless function on the same port.
+
+To deploy:
+
+```bash
+git push
+```
+
+Vercel auto-deploys `main` to https://nyc-311-optimizer.vercel.app.
