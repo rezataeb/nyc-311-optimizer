@@ -451,6 +451,25 @@
         }
       }
 
+      footer {
+        margin-top: 48px;
+        padding: 20px 0;
+        border-top: 1px solid var(--line);
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      footer a {
+        color: var(--city-blue);
+        text-decoration: none;
+        font-weight: 680;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+
       @media (max-width: 520px) {
         h1 {
           font-size: 2.25rem;
@@ -520,6 +539,9 @@
           <div class="results" id="results"></div>
         </section>
       </main>
+      <footer>
+        Open source on <a href="https://github.com/rezataeb/nyc-311-optimizer" target="_blank" rel="noreferrer">GitHub</a>
+      </footer>
     </div>
 
     <script type="module">
