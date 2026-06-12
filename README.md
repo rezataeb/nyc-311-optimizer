@@ -25,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000` (served by `vercel dev`).
+Open `http://localhost:5173`.
 
 Requires a `.env` file at the project root:
 
